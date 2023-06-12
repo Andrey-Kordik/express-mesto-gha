@@ -32,13 +32,16 @@ const createUser = (req, res, next) => {
     });
 };
 
-const updateUserData = (req, res) => {
+const updateUserData = (req, res, next) => {
   const { name, about } = req.body;
   return User.findByIdAndUpdate(
     req.user._id,
     { name, about },
   )
     .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Пользователь по указанному _id не найден'));
+      }
       res.status(200).send(user);
     });
 };
