@@ -16,3 +16,5 @@
 `npm run dev` — запускает сервер с hot-reload
 
 ### 13 проектная работа
+ Ссылка на репозиторий: https://github.com/Andrey-Kordik/express-mesto-gha
+ 
