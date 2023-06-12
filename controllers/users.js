@@ -37,6 +37,7 @@ const updateUserData = (req, res, next) => {
   return User.findByIdAndUpdate(
     req.user._id,
     { name, about },
+    { runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -51,6 +52,7 @@ const updateUserAvatar = (req, res, next) => {
   return User.findByIdAndUpdate(
     req.user._id,
     { avatar },
+    { runValidators: true },
   )
     .then((user) => {
       if (!user) {
