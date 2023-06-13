@@ -3,7 +3,6 @@ const User = require('../models/user');
 const VALIDATION_CODE = 400;
 const NOTFOUNDERROR_CODE = 404;
 
-
 const getUsers = (req, res) => User.find({})
   .then((users) => res.send(users));
 
@@ -13,7 +12,7 @@ const getUserById = (req, res, next) => {
   return User.findById(id)
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message:'Пользователь по указанному _id не найден'});
+        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.send(user);
     })
@@ -29,7 +28,7 @@ const createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         return res.status(VALIDATION_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -42,9 +41,9 @@ const updateUserData = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message:'Пользователь по указанному _id не найден'});
+        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
       }
-      res.send(user);
+      return res.send(user);
     })
     .catch(next);
 };
@@ -58,13 +57,19 @@ const updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message:'Пользователь по указанному _id не найден'});
+        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
       }
-      res.status(200).send(user);
+      return res.status(200).send(user);
     })
     .catch(next);
 };
 
 module.exports = {
-  getUsers, getUserById, createUser, updateUserData, updateUserAvatar, VALIDATION_CODE, NOTFOUNDERROR_CODE
+  getUsers,
+  getUserById,
+  createUser,
+  updateUserData,
+  updateUserAvatar,
+  VALIDATION_CODE,
+  NOTFOUNDERROR_CODE,
 };
