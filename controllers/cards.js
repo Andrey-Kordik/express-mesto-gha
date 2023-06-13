@@ -1,6 +1,5 @@
 const Card = require('../models/card');
-const ValidationError = require('../errors/ValidationError');
-const NotFoundError = require('../errors/NotFoundError');
+const  {VALIDATION_CODE, NOTFOUNDERROR_CODE} = require('./users')
 
 const getCards = (req, res) => Card.find({})
   .then((cards) => res.status(200).send(cards));
@@ -10,7 +9,7 @@ const deleteCard = (req, res, next) => {
   Card.findOne({ owner })
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Передан несуществующий _id карточки.'));
+        return res.status(NOTFOUNDERROR_CODE).send({ message:'Передан несуществующий _id карточки.'});
       }
       Card.deleteOne(card)
         .then(() => res.status(200).send({ message: 'Карточка удалена' }));
@@ -24,7 +23,7 @@ const createCard = (req, res, next) => {
     .then((newCard) => res.status(201).send(newCard))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании карточки.'));
+        return res.status(VALIDATION_CODE).send({ message:'Переданы некорректные данные при создании карточки.'});
       } else {
         next(err);
       }
@@ -39,7 +38,7 @@ const putLike = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return next(new NotFoundError('Передан несуществующий _id карточки.'));
+        return res.status(NOTFOUNDERROR_CODE).send({ message:'Передан несуществующий _id карточки.'});
       }
       return res.send(card);
     })
@@ -54,9 +53,7 @@ const deleteLike = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return next(
-          new NotFoundError('Передан несуществующий _id карточки.'),
-        );
+        return res.status(NOTFOUNDERROR_CODE).send({ message:'Передан несуществующий _id карточки.'});
       }
       return res.send(card);
     })

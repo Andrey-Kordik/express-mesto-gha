@@ -1,9 +1,11 @@
 const User = require('../models/user');
-const ValidationError = require('../errors/ValidationError');
-const NotFoundError = require('../errors/NotFoundError');
+
+const VALIDATION_CODE = 400;
+const NOTFOUNDERROR_CODE = 404;
+
 
 const getUsers = (req, res) => User.find({})
-  .then((users) => res.status(200).send(users));
+  .then((users) => res.send(users));
 
 const getUserById = (req, res, next) => {
   const { id } = req.params;
@@ -11,7 +13,7 @@ const getUserById = (req, res, next) => {
   return User.findById(id)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден'));
+        return res.status(NOTFOUNDERROR_CODE).send({ message:'Пользователь по указанному _id не найден'});
       }
       return res.send(user);
     })
@@ -25,10 +27,9 @@ const createUser = (req, res, next) => {
     .then((newUser) => res.status(201).send(newUser))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании пользователя'));
-      } else {
-        next(err);
+        return res.status(VALIDATION_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
+      next(err);
     });
 };
 
@@ -41,10 +42,11 @@ const updateUserData = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден'));
+        return res.status(NOTFOUNDERROR_CODE).send({ message:'Пользователь по указанному _id не найден'});
       }
-      res.status(200).send(user);
-    });
+      res.send(user);
+    })
+    .catch(next);
 };
 
 const updateUserAvatar = (req, res, next) => {
@@ -56,12 +58,13 @@ const updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден'));
+        return res.status(NOTFOUNDERROR_CODE).send({ message:'Пользователь по указанному _id не найден'});
       }
       res.status(200).send(user);
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {
-  getUsers, getUserById, createUser, updateUserData, updateUserAvatar,
+  getUsers, getUserById, createUser, updateUserData, updateUserAvatar, VALIDATION_CODE, NOTFOUNDERROR_CODE
 };

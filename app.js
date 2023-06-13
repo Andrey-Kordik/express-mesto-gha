@@ -1,17 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 
 const app = express();
+app.disable('x-powered-by');
+
+app.use(helmet());
+app.use(bodyParser.json());
 
 const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb').then(() => {
   console.log('connected to db');
 });
-
-app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   req.user = {
@@ -21,9 +24,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  res.send('<p>немного html</p>');
-});
 app.use(userRoutes);
 app.use(cardRoutes);
 
