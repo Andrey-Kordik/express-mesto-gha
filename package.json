@@ -13,10 +13,12 @@
   "author": "Andrey Kordik",
   "license": "ISC",
   "dependencies": {
+    "@types/validator": "^13.7.17",
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
-    "mongoose": "^7.2.2"
+    "mongoose": "^7.2.2",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "eslint": "^8.2.0",
