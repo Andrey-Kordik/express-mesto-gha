@@ -4,15 +4,17 @@ const { VALIDATION_CODE, NOTFOUNDERROR_CODE } = require('./users');
 const getCards = (req, res) => Card.find({})
   .then((cards) => res.status(200).send(cards));
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const owner = req.user._id;
   Card.findOne({ owner })
     .then((card) => {
-      if (!card) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Передан несуществующий _id карточки.' });
+      if (!card.owner.equals(owner)) {
+        res.status(401).send({ message: 'Нет прав на удаление этой карточки' });
+      } else {
+        return Card.deleteOne(card)
+          .then(() => res.status(200).send({ message: 'Карточка удалена' }));
       }
-      return Card.deleteOne(card)
-        .then(() => res.status(200).send({ message: 'Карточка удалена' }));
+      return next();
     });
 };
 
