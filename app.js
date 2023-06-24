@@ -6,6 +6,7 @@ const userRoutes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
+const errorHandler = require('./middlewares/error-handler');
 
 const app = express();
 
@@ -22,10 +23,9 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb').then(() => {
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use(userRoutes);
-app.use(cardRoutes);
-
-app.use(auth);
+app.use('/', auth, userRoutes);
+app.use('/', auth, cardRoutes);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);

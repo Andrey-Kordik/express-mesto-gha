@@ -2,8 +2,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const VALIDATION_CODE = 400;
-const NOTFOUNDERROR_CODE = 404;
+const NotFoundError = require('../errors/NotFoundError');
+const ValidationError = require('../errors/ValidationError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const getUsers = (req, res) => User.find({})
   .then((users) => res.send(users));
@@ -13,7 +14,7 @@ const getUserById = (req, res, next) => {
 
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
+        throw new NotFoundError('Пользователь по указанному _id не найден');
       }
       return res.send(user);
     })
@@ -24,7 +25,9 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-
+  if (!email || !password) {
+    throw new ValidationError('Не переданы email или пароль');
+  }
   bcrypt.hash(password, 8)
     .then((hash) => User.create({
       name,
@@ -36,7 +39,7 @@ const createUser = (req, res, next) => {
     .then((newUser) => res.status(201).send(newUser))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        throw new ValidationError('Переданы некорректные данные при создании пользователя');
       }
       return next(err);
     });
@@ -51,7 +54,7 @@ const updateUserData = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
+        throw new NotFoundError('Пользователь по указанному _id не найден');
       }
       return res.send(user);
     })
@@ -67,7 +70,7 @@ const updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
+        throw new NotFoundError('Пользователь по указанному _id не найден');
       }
       return res.status(200).send(user);
     })
@@ -83,17 +86,17 @@ const login = (req, res) => {
 
       return res.status(200).send({ token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
+    .catch(() => {
+      throw new UnauthorizedError('Ошибка авторизации');
     });
 };
 
 const getMyData = (req, res, next) => {
-  const { _id } = req.user;
+  const { _id } = req.user._id;
   User.find({ _id })
     .then((user) => {
       if (!user) {
-        return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
+        throw new NotFoundError('Пользователь по указанному _id не найден');
       }
       return res.status(200).send(user);
     })
@@ -108,6 +111,4 @@ module.exports = {
   updateUserAvatar,
   login,
   getMyData,
-  VALIDATION_CODE,
-  NOTFOUNDERROR_CODE,
 };
