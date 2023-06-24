@@ -7,13 +7,12 @@ const auth = (req, res, next) => {
     return res.status(401).send({ message: 'Необходима авторизация' });
   }
   const token = authorization.replace('Bearer ', '');
-  let payload;
+  let payload = {};
   try {
     payload = jwt.verify(token, 'super-strong-secret');
   } catch (err) {
     return res.status(401).send({ message: 'Необходима авторизация' });
   }
-
   req.user = payload;
   return next();
 };

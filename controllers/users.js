@@ -9,9 +9,8 @@ const getUsers = (req, res) => User.find({})
   .then((users) => res.send(users));
 
 const getUserById = (req, res, next) => {
-  const { id } = req.params;
+  User.findById(req.params.userId)
 
-  return User.findById(id)
     .then((user) => {
       if (!user) {
         return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
@@ -23,10 +22,10 @@ const getUserById = (req, res, next) => {
 
 const createUser = (req, res, next) => {
   const {
-    name, about, avatar, email,
+    name, about, avatar, email, password,
   } = req.body;
 
-  bcrypt.hash(req.body.password, 8)
+  bcrypt.hash(password, 8)
     .then((hash) => User.create({
       name,
       about,
@@ -79,10 +78,10 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
-    .then(() => {
-      const token = jwt.sign({ _id: 'd285e3dceed844f902650f40' }, 'super-strong-secret', { expiresIn: '7d' });
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
 
-      res.send({ token });
+      return res.status(200).send({ token });
     })
     .catch((err) => {
       res.status(401).send({ message: err.message });
@@ -90,7 +89,8 @@ const login = (req, res) => {
 };
 
 const getMyData = (req, res, next) => {
-  User.findById(req.user._id)
+  const { _id } = req.user;
+  User.find({ _id })
     .then((user) => {
       if (!user) {
         return res.status(NOTFOUNDERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
